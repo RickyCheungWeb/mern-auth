@@ -5,6 +5,7 @@ import userRoutes from './routes/user.route.js';
 import authRoutes from './routes/auth.route.js';
 dotenv.config();
 
+// Mongo db connection
 mongoose
   .connect(process.env.MONGO)
   .then(() => {
@@ -14,19 +15,23 @@ mongoose
     console.log(err);
   });
 
+  // enable app and express method
 const app = express();
 
 // To receive json
 app.use(express.json());
 
+
 app.listen(3000, () => {
   console.log('Server listening on port 3000');
 });
 
+// setup routers, linked to routes folder
+// routes folder linked to controllers(functions)
 app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
 
-// Middleware
+// Middleware for error handling
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
