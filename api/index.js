@@ -15,12 +15,11 @@ mongoose
     console.log(err);
   });
 
-  // enable app and express method
+// enable app and express method
 const app = express();
 
 // To receive json
 app.use(express.json());
-
 
 app.listen(3000, () => {
   console.log('Server listening on port 3000');
@@ -37,7 +36,7 @@ app.use((err, req, res, next) => {
   const message = err.message || 'Internal Server Error';
   return res.status(statusCode).json({
     success: false,
-    error: message,
-    statusCode: statusCode,
+    message,
+    statusCode,
   });
 });

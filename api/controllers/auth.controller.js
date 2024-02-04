@@ -1,6 +1,6 @@
 import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
-import errorHandler from '../utils/error.js';
+import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
 
 // signup async funtion to process request and response
@@ -25,10 +25,10 @@ export const signin = async (req, res, next) => {
   try {
     // Mongo method to check useremail
     const validUser = await User.findOne({ email });
-    if (!validUser) return next(errorHandler(404, 'wrong credentials'));
+    if (!validUser) return next(errorHandler(404, 'User not found'));
     // Check password
     const validPassword = bcryptjs.compareSync(password, validUser.password);
-    if (!validPassword) return next(errorHandler(404, 'wrong credentials'));
+    if (!validPassword) return next(errorHandler(404, 'Wrong credentials'));
 
     // jsonwebtoken
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);

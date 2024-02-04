@@ -1,11 +1,21 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from '../redux/user/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { loading, error } = useSelector((state) => state.user);
+  console.log(error);
+  // const [error, setError] = useState(false);
+  // const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -14,8 +24,7 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setError(false);
-      setLoading(true);
+      dispatch(signInStart());
 
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
@@ -27,16 +36,15 @@ export default function SignIn() {
 
       const data = await res.json();
 
-      setError(false);
-
-      if (!res.ok) {
-        throw new Error('Failed to sign in.');
+      if (data.success === false) {
+        dispatch(signInFailure(data));
+        return;
       }
+      dispatch(signInSuccess(data));
       navigate('/');
     } catch (error) {
-      setError(true);
+      dispatch(signInFailure(error));
     }
-    setLoading(false);
   };
 
   return (
@@ -72,12 +80,12 @@ export default function SignIn() {
           <span className='text-blue-500'>Sign up</span>
         </Link>
       </div>
-      {error && (
-        <p className='text-red-700 mt-5'>
-          {' '}
-          Could not sign in with this credential, please try again.
-        </p>
-      )}
+
+      <p className='text-red-700 mt-5'>
+        {error
+          ? error.message || 'Could not sign in with this credential, please try again.'
+          : ''}
+      </p>
     </div>
   );
 }
