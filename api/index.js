@@ -30,6 +30,7 @@ app.listen(3000, () => {
 app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
 
+
 // Middleware for error handling
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
