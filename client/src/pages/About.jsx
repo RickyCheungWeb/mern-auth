@@ -25,7 +25,7 @@ export default function About() {
         developing full-stack web applications with authentication using the
         MERN stack. I'm enthusiastic about embarking on my career as a front-end
         or full-stack developer. Feel free to contact me at 0420 883 450 or via
-        email at rickycreate@gmail.com.
+        email at rickycreact@gmail.com.
       </p>
     </div>
   );

@@ -23,7 +23,7 @@ function Home() {
         in learning to build full-stack web applications with authentication
         using the MERN stack. I am enthusiastic about beginning my career as a
         front-end or full-stack developer. Feel free to contact me at 0420 883
-        450 or via email at rickycreate@gmail.com.
+        450 or via email at rickycreact@gmail.com.
       </p>
     </div>
   );
