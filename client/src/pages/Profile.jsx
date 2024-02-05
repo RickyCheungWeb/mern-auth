@@ -1,16 +1,97 @@
 import { useSelector } from 'react-redux';
+import { useEffect, useRef, useState } from 'react';
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from 'firebase/storage';
+import { app } from '../firebase';
 
 export default function Profile() {
   const { currentUser } = useSelector((state) => state.user);
+
+  // declare ref point to input file function
+  const fileRef = useRef(null);
+  // tracking image UI update
+  const [image, setImage] = useState(undefined);
+  // Image Progress UI State
+  const [imagePercent, setImagePercent] = useState(0);
+  //Image Error State
+  const [imageError, setImageError] = useState(false);
+  //Image formData
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    if (image) {
+      handleFileUpload(image);
+    }
+  }, [image]);
+
+  const handleFileUpload = async (image) => {
+    const storage = getStorage(app); //Declare the storage on firebase: getStorage and app from firebase
+    const fileName = new Date().getTime() + image.name; //Update the name of uploaded file: unqiue filename
+    const storageRef = ref(storage, fileName); //Declare a reference of the storage and filename
+    const uploadTask = uploadBytesResumable(storageRef, image); //Declare task of uploading the image to the storage reference.
+
+    uploadTask.on(
+      'state_changed',
+      // Progress Diagram Logic: get progress by snapshot!!
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setImagePercent(Math.round(progress));
+      },
+      //Error Handling
+      (error) => {
+        setImageError(true);
+      },
+      //Setup an image URL formData of the uploaded image using uploadTask snapshot reference.
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setFormData({ ...formData, profilePicture: downloadURL });
+        });
+      }
+    );
+  };
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7 '>Profile</h1>
       <form className='flex flex-col gap-4'>
+        <input
+          type='file'
+          ref={fileRef}
+          hidden
+          accept='image/*'
+          onChange={(e) => setImage(e.target.files[0])} //Update image UI when file uploaded
+        />
+        {/* Modified filebase rules:
+          allow read;
+          allow write:if request.resource.size<2* 1024 *1024 &&
+          request.resource.contentType.matches('image/.*'); */}
+
         <img
           src={currentUser.profilePicture}
           alt='profile'
           className='h-24 w-24 self-center cursor-pointer rounded-full object-cover mt-2'
+          onClick={() => fileRef.current.click()} //a callback function to activate file input
         />
+        {/* Error and Progress UI */}
+        <p className='text-sm self-center'>
+          {imageError ? (
+            <span className='text-red-700'>
+              Error uploading image(file must be an image and size must be less
+              than 2 MB)
+            </span>
+          ) : imagePercent > 0 && imagePercent < 100 ? (
+            <span className='text-slate-700'>{`Uploading: ${imagePercent}%`}</span>
+          ) : imagePercent === 100 ? (
+            <span className='text-green-700'>Image uploaded successfully</span>
+          ) : (
+            ''
+          )}
+        </p>
         <input
           defaultValue={currentUser.username}
           type='text'
