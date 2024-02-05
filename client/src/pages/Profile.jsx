@@ -73,7 +73,7 @@ export default function Profile() {
   };
   //Handle Form Submit
   const handleSubmit = async (e) => {
-    e.prevent.Default();
+    e.preventDefault();
     try {
       dispatch(updateUserStart());
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
